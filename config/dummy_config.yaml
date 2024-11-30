@@ -7,7 +7,7 @@ algorithm:
   use_clipped_value_loss: true
   # -- surrogate loss
   desired_kl: 0.01
-  entropy_coef: 0.01
+  entropy_coef: 0.001
   gamma: 0.99
   lam: 0.95
   max_grad_norm: 1.0
@@ -20,16 +20,16 @@ policy:
   class_name: ActorCritic
   # for MLP i.e. `ActorCritic`
   activation: elu
-  actor_hidden_dims: [128, 128, 128]
-  critic_hidden_dims: [128, 128, 128]
-  init_noise_std: 1.0
+  actor_hidden_dims: [512, 256, 128]
+  critic_hidden_dims: [512, 256, 128]
+  init_noise_std: 0.8
   # only needed for `ActorCriticRecurrent`
   # rnn_type: 'lstm'
   # rnn_hidden_size: 512
   # rnn_num_layers: 1
 runner:
     num_steps_per_env: 24  # number of steps per environment per iteration
-    max_iterations: 1500  # number of policy updates
+    max_iterations: 1500000  # number of policy updates
     empirical_normalization: false
     # -- logging parameters
     save_interval: 50  # check for potential saves every `save_interval` iterations

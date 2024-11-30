@@ -24,6 +24,7 @@ class OnPolicyRunner:
         self.cfg = train_cfg
         self.alg_cfg = train_cfg["algorithm"]
         self.policy_cfg = train_cfg["policy"]
+        self.runner_cfg = train_cfg["runner"]
         self.device = device
         self.env = env
         obs, extras = self.env.get_observations()
@@ -38,9 +39,9 @@ class OnPolicyRunner:
         ).to(self.device)
         alg_class = eval(self.alg_cfg.pop("class_name"))  # PPO
         self.alg: PPO = alg_class(actor_critic, device=self.device, **self.alg_cfg)
-        self.num_steps_per_env = self.cfg["num_steps_per_env"]
-        self.save_interval = self.cfg["save_interval"]
-        self.empirical_normalization = self.cfg["empirical_normalization"]
+        self.num_steps_per_env = self.runner_cfg["num_steps_per_env"]
+        self.save_interval = self.runner_cfg["save_interval"]
+        self.empirical_normalization = self.runner_cfg["empirical_normalization"]
         if self.empirical_normalization:
             self.obs_normalizer = EmpiricalNormalization(shape=[num_obs], until=1.0e8).to(self.device)
             self.critic_obs_normalizer = EmpiricalNormalization(shape=[num_critic_obs], until=1.0e8).to(self.device)
@@ -125,7 +126,7 @@ class OnPolicyRunner:
                         critic_obs = obs
                     # process the step
                     self.alg.process_env_step(rewards, dones, infos)
-
+                    # import ipdb; ipdb.set_trace()
                     if self.log_dir is not None:
                         # Book keeping
                         # note: we changed logging to use "log" instead of "episode" to avoid confusion with
@@ -204,6 +205,7 @@ class OnPolicyRunner:
         self.writer.add_scalar("Perf/total_fps", fps, locs["it"])
         self.writer.add_scalar("Perf/collection time", locs["collection_time"], locs["it"])
         self.writer.add_scalar("Perf/learning_time", locs["learn_time"], locs["it"])
+        # print("rewbuffer", locs["rewbuffer"])
         if len(locs["rewbuffer"]) > 0:
             self.writer.add_scalar("Train/mean_reward", statistics.mean(locs["rewbuffer"]), locs["it"])
             self.writer.add_scalar("Train/mean_episode_length", statistics.mean(locs["lenbuffer"]), locs["it"])
@@ -285,7 +287,7 @@ class OnPolicyRunner:
         if device is not None:
             self.alg.actor_critic.to(device)
         policy = self.alg.actor_critic.act_inference
-        if self.cfg["empirical_normalization"]:
+        if self.runner_cfg["empirical_normalization"]:
             if device is not None:
                 self.obs_normalizer.to(device)
             policy = lambda x: self.alg.actor_critic.act_inference(self.obs_normalizer(x))  # noqa: E731
