@@ -7,7 +7,7 @@ algorithm:
   use_clipped_value_loss: true
   # -- surrogate loss
   desired_kl: 0.01
-  entropy_coef: 0.001
+  entropy_coef: 0.01
   gamma: 0.99
   lam: 0.95
   max_grad_norm: 1.0
@@ -20,8 +20,8 @@ policy:
   class_name: ActorCritic
   # for MLP i.e. `ActorCritic`
   activation: elu
-  actor_hidden_dims: [512, 256, 128]
-  critic_hidden_dims: [512, 256, 128]
+  actor_hidden_dims: [256, 256, 256, 256]
+  critic_hidden_dims: [256, 256, 256, 256]
   init_noise_std: 0.8
   # only needed for `ActorCriticRecurrent`
   # rnn_type: 'lstm'
